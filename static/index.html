@@ -3,54 +3,255 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Resume Screening System</title>
+  <title>AI Resume Screening & Candidate Evaluator</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; background: #f8fafc; color: #0f172a; }
-    .card { background: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.9rem; }
-    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; }
-    input, select { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-    button { margin-top: 1.2rem; width: 100%; padding: 0.75rem; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-    button:hover { background: #1d4ed8; }
-    #result { margin-top: 1.25rem; padding: 1rem; border-radius: 8px; display: none; }
-    .pass { background: #dcfce7; border: 1px solid #86efac; }
-    .fail { background: #fee2e2; border: 1px solid #fca5a5; }
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+    }
+    .topbar {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #fff;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+    .topbar-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .topbar h1 { margin: 0; font-size: 1.45rem; letter-spacing: -0.02em; }
+    .topbar p { margin: 0.25rem 0 0; color: #94a3b8; font-size: 0.9rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
+    .container { max-width: 960px; margin: 1.75rem auto 3rem; padding: 0 1rem; }
+    .presets {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+    .presets span { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+    .preset-btn {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+    .preset-btn.danger:hover { border-color: #dc2626; color: #dc2626; background: #fef2f2; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+      border: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      font-weight: 700;
+      margin: 1.25rem 0 0.75rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title:first-of-type { margin-top: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 0.9rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 0.3rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: var(--text);
+      background: #f8fafc;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .submit-btn {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+    .submit-btn:hover { box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
+    .submit-btn:active { transform: scale(0.99); }
+    #result {
+      margin-top: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      border-radius: 10px;
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .pass { background: #f0fdf4; border: 1px solid #86efac; }
+    .fail { background: #fef2f2; border: 1px solid #fca5a5; }
+    .res-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .res-title { margin: 0; font-size: 1.2rem; }
+    .pass .res-title { color: #166534; }
+    .fail .res-title { color: #991b1b; }
+    .prob-pill {
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid currentColor;
+    }
+    .bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 0.85rem 0 1rem;
+    }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+    .tips-list { margin: 0.5rem 0 0; padding-left: 1.2rem; line-height: 1.6; font-size: 0.92rem; }
+    .footer-links { text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--muted); }
+    .footer-links a { color: var(--primary); text-decoration: none; font-weight: 600; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>AI Resume Screening & Candidate Evaluator</h2>
-    <p>Enter candidate resume metrics to evaluate shortlisting probability and receive actionable feedback.</p>
-    <form id="screenForm">
-      <div class="grid">
-        <div><label>Age (18-65)</label><input type="number" id="age" value="23" required /></div>
-        <div><label>Education Level</label>
-          <select id="education_level"><option>Bachelors</option><option>Masters</option><option>PhD</option></select>
-        </div>
-        <div><label>University Tier</label>
-          <select id="university_tier"><option>Tier 1</option><option selected>Tier 2</option><option>Tier 3</option></select>
-        </div>
-        <div><label>CGPA (0-10)</label><input type="number" step="0.01" id="cgpa" value="8.4" required /></div>
-        <div><label>Internships</label><input type="number" id="internships" value="2" required /></div>
-        <div><label>Projects</label><input type="number" id="projects" value="4" required /></div>
-        <div><label>Programming Languages</label><input type="number" id="programming_languages" value="4" required /></div>
-        <div><label>Certifications</label><input type="number" id="certifications" value="2" required /></div>
-        <div><label>Experience (Years)</label><input type="number" step="0.1" id="experience_years" value="1.0" required /></div>
-        <div><label>Hackathons</label><input type="number" id="hackathons" value="2" required /></div>
-        <div><label>Research Papers</label><input type="number" id="research_papers" value="0" required /></div>
-        <div><label>Technical Skills Score (0-40)</label><input type="number" step="0.5" id="skills_score" value="22.0" required /></div>
-        <div><label>Soft Skills Score (0-10)</label><input type="number" step="0.1" id="soft_skills_score" value="7.8" required /></div>
-        <div><label>Resume Word Count</label><input type="number" id="resume_length_words" value="450" required /></div>
-        <div><label>Target Company Type</label>
-          <select id="company_type"><option>MNC</option><option>Mid-size</option><option>Startup</option></select>
-        </div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <h1>AI Resume Screening & Candidate Evaluator</h1>
+        <p>Automated shortlisting inference & actionable resume feedback (CSL236 MLOps)</p>
       </div>
-      <button type="submit">Evaluate Candidate</button>
-    </form>
-    <div id="result"></div>
-  </div>
+      <div class="badge" id="apiBadge"><span class="dot"></span> API Ready</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="presets">
+      <span>Quick Demo Profiles:</span>
+      <button type="button" class="preset-btn" onclick="loadPreset('strong')">Strong Candidate</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('average')">Average Fresher</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('weak')">Weak Profile</button>
+      <button type="button" class="preset-btn danger" onclick="loadPreset('invalid')">Invalid Input (422 Test)</button>
+    </div>
+
+    <div class="card">
+      <form id="screenForm">
+        <div class="section-title">1. Academic & Demographic Profile</div>
+        <div class="grid">
+          <div><label>Age (18–65)</label><input type="number" id="age" value="23" required /></div>
+          <div><label>Education Level</label>
+            <select id="education_level"><option>Bachelors</option><option>Masters</option><option>PhD</option></select>
+          </div>
+          <div><label>University Tier</label>
+            <select id="university_tier"><option>Tier 1</option><option selected>Tier 2</option><option>Tier 3</option></select>
+          </div>
+          <div><label>CGPA (0–10)</label><input type="number" step="0.01" id="cgpa" value="8.5" required /></div>
+        </div>
+
+        <div class="section-title">2. Experience & Portfolio</div>
+        <div class="grid">
+          <div><label>Experience (Years)</label><input type="number" step="0.1" id="experience_years" value="1.0" required /></div>
+          <div><label>Internships</label><input type="number" id="internships" value="2" required /></div>
+          <div><label>Projects</label><input type="number" id="projects" value="4" required /></div>
+          <div><label>Hackathons</label><input type="number" id="hackathons" value="2" required /></div>
+          <div><label>Research Papers</label><input type="number" id="research_papers" value="1" required /></div>
+        </div>
+
+        <div class="section-title">3. Skills & Target Role</div>
+        <div class="grid">
+          <div><label>Programming Languages</label><input type="number" id="programming_languages" value="4" required /></div>
+          <div><label>Certifications</label><input type="number" id="certifications" value="3" required /></div>
+          <div><label>Technical Skills (0–40)</label><input type="number" step="0.5" id="skills_score" value="25.0" required /></div>
+          <div><label>Soft Skills (0–10)</label><input type="number" step="0.1" id="soft_skills_score" value="8.2" required /></div>
+          <div><label>Resume Word Count</label><input type="number" id="resume_length_words" value="450" required /></div>
+          <div><label>Target Company Type</label>
+            <select id="company_type"><option>MNC</option><option>Mid-size</option><option>Startup</option></select>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Evaluate Candidate Shortlisting</button>
+      </form>
+
+      <div id="result"></div>
+    </div>
+
+    <div class="footer-links">
+      Interactive API Schema & Testing: <a href="/docs" target="_blank">/docs (Swagger UI)</a> &bull;
+      Health Endpoint: <a href="/health" target="_blank">/health</a>
+    </div>
+  </main>
 
   <script>
+    const PRESETS = {
+      strong: { age: 25, education_level: "Masters", university_tier: "Tier 1", cgpa: 9.2, internships: 3, projects: 6, programming_languages: 5, certifications: 4, experience_years: 3.0, hackathons: 4, research_papers: 2, skills_score: 31.0, soft_skills_score: 9.0, resume_length_words: 520, company_type: "MNC" },
+      average: { age: 22, education_level: "Bachelors", university_tier: "Tier 2", cgpa: 7.8, internships: 1, projects: 3, programming_languages: 3, certifications: 1, experience_years: 0.5, hackathons: 1, research_papers: 0, skills_score: 18.0, soft_skills_score: 7.0, resume_length_words: 360, company_type: "Mid-size" },
+      weak: { age: 21, education_level: "Bachelors", university_tier: "Tier 3", cgpa: 5.4, internships: 0, projects: 1, programming_languages: 1, certifications: 0, experience_years: 0.0, hackathons: 0, research_papers: 0, skills_score: 6.0, soft_skills_score: 4.2, resume_length_words: 160, company_type: "MNC" },
+      invalid: { age: 19, education_level: "Bachelors", university_tier: "Tier 2", cgpa: 13.5, internships: 2, projects: 4, programming_languages: 4, certifications: 2, experience_years: 1.0, hackathons: 2, research_papers: 0, skills_score: 22.0, soft_skills_score: 7.8, resume_length_words: 450, company_type: "MNC" }
+    };
+
+    function loadPreset(type) {
+      const p = PRESETS[type];
+      Object.keys(p).forEach(k => { document.getElementById(k).value = p[k]; });
+    }
+
     document.getElementById("screenForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const payload = {
@@ -79,15 +280,25 @@
       const box = document.getElementById("result");
       box.style.display = "block";
       if (!res.ok) {
+        const err = data.detail?.[0];
         box.className = "fail";
-        box.innerHTML = `<strong>Validation Error (${res.status}):</strong> ${JSON.stringify(data.detail)}`;
+        box.innerHTML = `
+          <div class="res-header"><h3 class="res-title">HTTP ${res.status}: Data Contract Validation Failed</h3></div>
+          <p style="margin:0.5rem 0 0;"><strong>Field:</strong> <code>${err?.loc?.join(".")}</code> &mdash; ${err?.msg}</p>
+        `;
         return;
       }
-      box.className = data.prediction === 1 ? "pass" : "fail";
+      const pct = (data.shortlist_probability * 100).toFixed(1);
+      const isPass = data.prediction === 1;
+      box.className = isPass ? "pass" : "fail";
       box.innerHTML = `
-        <h3>${data.status} (Probability: ${(data.shortlist_probability * 100).toFixed(1)}%)</h3>
+        <div class="res-header">
+          <h3 class="res-title">${data.status}</h3>
+          <span class="prob-pill" style="color:${isPass ? '#166534' : '#991b1b'}">${pct}% Match</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%; background:${isPass ? '#16a34a' : '#dc2626'}"></div></div>
         <strong>Recommended Next Steps:</strong>
-        <ul>${data.tips.map(t => `<li>${t}</li>`).join("")}</ul>
+        <ul class="tips-list">${data.tips.map(t => `<li>${t}</li>`).join("")}</ul>
       `;
     });
   </script>
