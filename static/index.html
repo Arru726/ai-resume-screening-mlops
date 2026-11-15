@@ -3,33 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Resume Screening & Candidate Evaluator</title>
+  <title>TalentPulse AI — Resume Screening & MLOps Portal</title>
   <style>
     :root {
       --primary: #2563eb;
       --primary-dark: #1d4ed8;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-600: #475569;
+      --slate-400: #94a3b8;
       --bg: #f1f5f9;
       --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
       --border: #e2e8f0;
+      --success: #16a34a;
+      --danger: #dc2626;
     }
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: var(--slate-900);
       margin: 0;
       padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    .topbar {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+
+    /* Navigation Bar */
+    .navbar {
+      background: var(--slate-900);
       color: #fff;
-      padding: 1.5rem 2rem;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+      padding: 0.9rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
     }
-    .topbar-inner {
-      max-width: 960px;
+    .nav-inner {
+      max-width: 1060px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -37,52 +49,222 @@
       flex-wrap: wrap;
       gap: 1rem;
     }
-    .topbar h1 { margin: 0; font-size: 1.45rem; letter-spacing: -0.02em; }
-    .topbar p { margin: 0.25rem 0 0; color: #94a3b8; font-size: 0.9rem; }
-    .badge {
-      display: inline-flex;
+    .brand {
+      display: flex;
       align-items: center;
-      gap: 0.4rem;
-      background: rgba(16, 185, 129, 0.15);
+      gap: 0.6rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .brand-icon {
+      background: var(--primary);
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #cbd5e1;
+      padding: 0.45rem 0.9rem;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .nav-btn.cta {
+      background: var(--primary);
+      color: #fff;
+    }
+    .nav-btn.cta:hover { background: var(--primary-dark); }
+    .user-pill {
+      display: none;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(16, 185, 129, 0.16);
       color: #34d399;
-      border: 1px solid rgba(52, 211, 153, 0.3);
+      border: 1px solid rgba(52, 211, 153, 0.35);
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
       font-size: 0.8rem;
       font-weight: 600;
     }
-    .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
-    .container { max-width: 960px; margin: 1.75rem auto 3rem; padding: 0 1rem; }
-    .presets {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
+
+    /* Views */
+    .view { display: none; flex: 1; }
+    .view.active { display: block; animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Home Page */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: #fff;
+      padding: 4rem 1.5rem;
+      text-align: center;
     }
-    .presets span { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+    .hero-inner { max-width: 780px; margin: 0 auto; }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(96, 165, 250, 0.2);
+      border: 1px solid rgba(147, 197, 253, 0.35);
+      color: #93c5fd;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .hero h1 { font-size: 2.35rem; margin: 0 0 1rem; line-height: 1.2; letter-spacing: -0.02em; }
+    .hero p { font-size: 1.05rem; color: #cbd5e1; margin: 0 0 2rem; line-height: 1.6; }
+    .hero-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .btn-lg {
+      padding: 0.85rem 1.6rem;
+      border-radius: 9px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+    .btn-primary-lg { background: #3b82f6; color: #fff; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4); }
+    .btn-primary-lg:hover { background: #2563eb; }
+    .btn-outline-lg { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+    .btn-outline-lg:hover { background: rgba(255,255,255,0.16); }
+
+    .container { max-width: 1020px; margin: 2rem auto 3rem; padding: 0 1.25rem; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: -2.2rem;
+    }
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    }
+    .feature-card h3 { margin: 0 0 0.5rem; font-size: 1.05rem; color: var(--slate-900); }
+    .feature-card p { margin: 0; font-size: 0.9rem; color: var(--slate-600); line-height: 1.55; }
+    .stat-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .stat-num { font-size: 1.65rem; font-weight: 800; color: var(--primary); }
+    .stat-lbl { font-size: 0.82rem; color: var(--slate-600); font-weight: 600; margin-top: 0.2rem; }
+
+    /* Login Page */
+    .login-wrap {
+      max-width: 420px;
+      margin: 3.5rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.85rem;
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+      border: 1px solid var(--border);
+    }
+    .login-header { text-align: center; margin-bottom: 1.5rem; }
+    .login-header h2 { margin: 0 0 0.35rem; font-size: 1.4rem; }
+    .login-header p { margin: 0; font-size: 0.88rem; color: var(--slate-600); }
+    .demo-hint {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      margin-bottom: 1.1rem;
+    }
+    .login-err {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Form Controls */
+    .form-group { margin-bottom: 1rem; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 0.3rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.58rem 0.7rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: var(--slate-900);
+      background: #f8fafc;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    /* Screener Workspace */
+    .workspace-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .presets { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .presets span { font-size: 0.84rem; font-weight: 600; color: var(--slate-600); }
     .preset-btn {
       background: #fff;
       border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.4rem 0.85rem;
+      color: var(--slate-900);
+      padding: 0.4rem 0.8rem;
       border-radius: 6px;
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.15s;
     }
     .preset-btn:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
-    .preset-btn.danger:hover { border-color: #dc2626; color: #dc2626; background: #fef2f2; }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 1.75rem;
-      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
-      border: 1px solid var(--border);
-    }
+    .preset-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
     .section-title {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: var(--primary);
@@ -97,31 +279,8 @@
       grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
       gap: 0.9rem;
     }
-    label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #334155;
-      margin-bottom: 0.3rem;
-    }
-    input, select {
-      width: 100%;
-      padding: 0.55rem 0.65rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 0.92rem;
-      color: var(--text);
-      background: #f8fafc;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-    }
     .submit-btn {
-      margin-top: 1.5rem;
+      margin-top: 1.4rem;
       width: 100%;
       padding: 0.85rem;
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -132,18 +291,14 @@
       font-weight: 600;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-      transition: transform 0.1s, box-shadow 0.15s;
     }
     .submit-btn:hover { box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
-    .submit-btn:active { transform: scale(0.99); }
     #result {
       margin-top: 1.5rem;
       padding: 1.25rem 1.5rem;
       border-radius: 10px;
       display: none;
-      animation: fadeIn 0.25s ease-out;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .pass { background: #f0fdf4; border: 1px solid #86efac; }
     .fail { background: #fef2f2; border: 1px solid #fca5a5; }
     .res-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
@@ -168,76 +323,172 @@
     }
     .bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
     .tips-list { margin: 0.5rem 0 0; padding-left: 1.2rem; line-height: 1.6; font-size: 0.92rem; }
-    .footer-links { text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--muted); }
-    .footer-links a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+    footer {
+      background: var(--slate-900);
+      color: var(--slate-400);
+      text-align: center;
+      padding: 1.1rem;
+      font-size: 0.82rem;
+      margin-top: auto;
+    }
+    footer a { color: #60a5fa; text-decoration: none; }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div>
-        <h1>AI Resume Screening & Candidate Evaluator</h1>
-        <p>Automated shortlisting inference & actionable resume feedback (CSL236 MLOps)</p>
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="brand" onclick="switchView('home')">
+        <div class="brand-icon">TP</div>
+        <span>TalentPulse AI</span>
       </div>
-      <div class="badge" id="apiBadge"><span class="dot"></span> API Ready</div>
+      <div class="nav-links">
+        <button class="nav-btn active" id="nav-home" onclick="switchView('home')">Home</button>
+        <button class="nav-btn" id="nav-screener" onclick="openScreener()">Resume Screener</button>
+        <a class="nav-btn" href="/docs" target="_blank" style="text-decoration:none;">API Docs</a>
+        <div class="user-pill" id="userBadge">Recruiter Active</div>
+        <button class="nav-btn cta" id="authBtn" onclick="handleAuthClick()">Recruiter Login</button>
+      </div>
     </div>
-  </header>
+  </nav>
 
-  <main class="container">
-    <div class="presets">
-      <span>Quick Demo Profiles:</span>
-      <button type="button" class="preset-btn" onclick="loadPreset('strong')">Strong Candidate</button>
-      <button type="button" class="preset-btn" onclick="loadPreset('average')">Average Fresher</button>
-      <button type="button" class="preset-btn" onclick="loadPreset('weak')">Weak Profile</button>
-      <button type="button" class="preset-btn danger" onclick="loadPreset('invalid')">Invalid Input (422 Test)</button>
-    </div>
-
-    <div class="card">
-      <form id="screenForm">
-        <div class="section-title">1. Academic & Demographic Profile</div>
-        <div class="grid">
-          <div><label>Age (18–65)</label><input type="number" id="age" value="23" required /></div>
-          <div><label>Education Level</label>
-            <select id="education_level"><option>Bachelors</option><option>Masters</option><option>PhD</option></select>
-          </div>
-          <div><label>University Tier</label>
-            <select id="university_tier"><option>Tier 1</option><option selected>Tier 2</option><option>Tier 3</option></select>
-          </div>
-          <div><label>CGPA (0–10)</label><input type="number" step="0.01" id="cgpa" value="8.5" required /></div>
+  <!-- VIEW 1: HOME PAGE -->
+  <section id="view-home" class="view active">
+    <div class="hero">
+      <div class="hero-inner">
+        <span class="hero-tag">CSL236 MLOps Production System &bull; Gradient Boosting</span>
+        <h1>Intelligent Resume Screening &amp; Candidate Shortlisting</h1>
+        <p>
+          Accelerate campus and enterprise hiring with calibrated ML shortlisting probabilities,
+          strict Pydantic schema validation, MLflow experiment tracking, and instant resume feedback.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-lg btn-primary-lg" onclick="openScreener()">Launch Candidate Screener</button>
+          <button class="btn-lg btn-outline-lg" onclick="switchView('login')">Recruiter Sign In</button>
         </div>
+      </div>
+    </div>
 
-        <div class="section-title">2. Experience & Portfolio</div>
-        <div class="grid">
-          <div><label>Experience (Years)</label><input type="number" step="0.1" id="experience_years" value="1.0" required /></div>
-          <div><label>Internships</label><input type="number" id="internships" value="2" required /></div>
-          <div><label>Projects</label><input type="number" id="projects" value="4" required /></div>
-          <div><label>Hackathons</label><input type="number" id="hackathons" value="2" required /></div>
-          <div><label>Research Papers</label><input type="number" id="research_papers" value="1" required /></div>
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Calibrated ML Inference</h3>
+          <p>Trained on 20,000 cleaned candidate profiles using Gradient Boosting (F1: 0.825) tracked via MLflow SQLite registry.</p>
         </div>
+        <div class="feature-card">
+          <h3>Strict Data Contracts</h3>
+          <p>All 15 candidate features are enforced at runtime using Pydantic, automatically rejecting out-of-range inputs with HTTP 422.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Actionable Career Tips</h3>
+          <p>Beyond binary shortlisting, every candidate receives tailored recommendations across CGPA, projects, skills, and internships.</p>
+        </div>
+      </div>
 
-        <div class="section-title">3. Skills & Target Role</div>
-        <div class="grid">
-          <div><label>Programming Languages</label><input type="number" id="programming_languages" value="4" required /></div>
-          <div><label>Certifications</label><input type="number" id="certifications" value="3" required /></div>
-          <div><label>Technical Skills (0–40)</label><input type="number" step="0.5" id="skills_score" value="25.0" required /></div>
-          <div><label>Soft Skills (0–10)</label><input type="number" step="0.1" id="soft_skills_score" value="8.2" required /></div>
-          <div><label>Resume Word Count</label><input type="number" id="resume_length_words" value="450" required /></div>
-          <div><label>Target Company Type</label>
-            <select id="company_type"><option>MNC</option><option>Mid-size</option><option>Startup</option></select>
+      <div class="stat-strip">
+        <div><div class="stat-num">20,000</div><div class="stat-lbl">Clean Training Records</div></div>
+        <div><div class="stat-num">0.825</div><div class="stat-lbl">Gradient Boosting F1</div></div>
+        <div><div class="stat-num">15</div><div class="stat-lbl">Validated Schema Features</div></div>
+        <div><div class="stat-num">&lt;15 ms</div><div class="stat-lbl">API Inference Latency</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW 2: LOGIN PAGE -->
+  <section id="view-login" class="view">
+    <div class="login-wrap">
+      <div class="card">
+        <div class="login-header">
+          <h2>Recruiter Portal Login</h2>
+          <p>Sign in to access the candidate screening workspace</p>
+        </div>
+        <div class="demo-hint">
+          <strong>Demo Credentials:</strong><br/>
+          Email: <code>recruiter@ncuindia.edu</code> &bull; Password: <code>csl236mlops</code>
+        </div>
+        <div class="login-err" id="loginErr">Invalid email or password. Use the demo credentials above.</div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label>Work Email</label>
+            <input type="email" id="loginEmail" value="recruiter@ncuindia.edu" required />
           </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPass" value="csl236mlops" required />
+          </div>
+          <button type="submit" class="submit-btn">Sign In to Screener</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW 3: CANDIDATE SCREENER WORKSPACE -->
+  <section id="view-screener" class="view">
+    <div class="container">
+      <div class="workspace-header">
+        <div>
+          <h2 style="margin:0; font-size:1.35rem;">Candidate Shortlisting Evaluator</h2>
+          <p style="margin:0.2rem 0 0; font-size:0.86rem; color:var(--slate-600);">Fill candidate metrics or select a quick demo profile below</p>
         </div>
+        <div class="presets">
+          <span>Demo Presets:</span>
+          <button type="button" class="preset-btn" onclick="loadPreset('strong')">Strong Candidate</button>
+          <button type="button" class="preset-btn" onclick="loadPreset('average')">Average Fresher</button>
+          <button type="button" class="preset-btn" onclick="loadPreset('weak')">Weak Profile</button>
+          <button type="button" class="preset-btn danger" onclick="loadPreset('invalid')">Invalid Input (422)</button>
+        </div>
+      </div>
 
-        <button type="submit" class="submit-btn">Evaluate Candidate Shortlisting</button>
-      </form>
+      <div class="card">
+        <form id="screenForm">
+          <div class="section-title">1. Academic &amp; Demographic Profile</div>
+          <div class="grid">
+            <div><label>Age (18–65)</label><input type="number" id="age" value="23" required /></div>
+            <div><label>Education Level</label>
+              <select id="education_level"><option>Bachelors</option><option>Masters</option><option>PhD</option></select>
+            </div>
+            <div><label>University Tier</label>
+              <select id="university_tier"><option>Tier 1</option><option selected>Tier 2</option><option>Tier 3</option></select>
+            </div>
+            <div><label>CGPA (0–10)</label><input type="number" step="0.01" id="cgpa" value="8.5" required /></div>
+          </div>
 
-      <div id="result"></div>
+          <div class="section-title">2. Experience &amp; Portfolio</div>
+          <div class="grid">
+            <div><label>Experience (Years)</label><input type="number" step="0.1" id="experience_years" value="1.0" required /></div>
+            <div><label>Internships</label><input type="number" id="internships" value="2" required /></div>
+            <div><label>Projects</label><input type="number" id="projects" value="4" required /></div>
+            <div><label>Hackathons</label><input type="number" id="hackathons" value="2" required /></div>
+            <div><label>Research Papers</label><input type="number" id="research_papers" value="1" required /></div>
+          </div>
+
+          <div class="section-title">3. Skills &amp; Target Role</div>
+          <div class="grid">
+            <div><label>Programming Languages</label><input type="number" id="programming_languages" value="4" required /></div>
+            <div><label>Certifications</label><input type="number" id="certifications" value="3" required /></div>
+            <div><label>Technical Skills (0–40)</label><input type="number" step="0.5" id="skills_score" value="25.0" required /></div>
+            <div><label>Soft Skills (0–10)</label><input type="number" step="0.1" id="soft_skills_score" value="8.2" required /></div>
+            <div><label>Resume Word Count</label><input type="number" id="resume_length_words" value="450" required /></div>
+            <div><label>Target Company Type</label>
+              <select id="company_type"><option>MNC</option><option>Mid-size</option><option>Startup</option></select>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Evaluate Candidate Shortlisting</button>
+        </form>
+
+        <div id="result"></div>
+      </div>
     </div>
+  </section>
 
-    <div class="footer-links">
-      Interactive API Schema & Testing: <a href="/docs" target="_blank">/docs (Swagger UI)</a> &bull;
-      Health Endpoint: <a href="/health" target="_blank">/health</a>
-    </div>
-  </main>
+  <footer>
+    TalentPulse AI &bull; CSL236 MLOps Project (The NorthCap University) &bull;
+    <a href="/docs" target="_blank">Swagger API</a> &bull;
+    <a href="/health" target="_blank">Health Status</a>
+  </footer>
 
   <script>
     const PRESETS = {
@@ -246,6 +497,68 @@
       weak: { age: 21, education_level: "Bachelors", university_tier: "Tier 3", cgpa: 5.4, internships: 0, projects: 1, programming_languages: 1, certifications: 0, experience_years: 0.0, hackathons: 0, research_papers: 0, skills_score: 6.0, soft_skills_score: 4.2, resume_length_words: 160, company_type: "MNC" },
       invalid: { age: 19, education_level: "Bachelors", university_tier: "Tier 2", cgpa: 13.5, internships: 2, projects: 4, programming_languages: 4, certifications: 2, experience_years: 1.0, hackathons: 2, research_papers: 0, skills_score: 22.0, soft_skills_score: 7.8, resume_length_words: 450, company_type: "MNC" }
     };
+
+    function isLoggedIn() {
+      return sessionStorage.getItem("tp_user") !== null;
+    }
+
+    function updateAuthUI() {
+      const user = sessionStorage.getItem("tp_user");
+      const badge = document.getElementById("userBadge");
+      const btn = document.getElementById("authBtn");
+      if (user) {
+        badge.style.display = "inline-flex";
+        badge.textContent = user;
+        btn.textContent = "Logout";
+        btn.classList.remove("cta");
+      } else {
+        badge.style.display = "none";
+        btn.textContent = "Recruiter Login";
+        btn.classList.add("cta");
+      }
+    }
+
+    function switchView(name) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById("view-" + name).classList.add("active");
+      const navEl = document.getElementById("nav-" + name);
+      if (navEl) navEl.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function openScreener() {
+      if (!isLoggedIn()) {
+        switchView("login");
+      } else {
+        switchView("screener");
+      }
+    }
+
+    function handleAuthClick() {
+      if (isLoggedIn()) {
+        sessionStorage.removeItem("tp_user");
+        updateAuthUI();
+        switchView("home");
+      } else {
+        switchView("login");
+      }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const pass = document.getElementById("loginPass").value;
+      const errBox = document.getElementById("loginErr");
+      if (email && pass.length >= 4) {
+        errBox.style.display = "none";
+        sessionStorage.setItem("tp_user", email);
+        updateAuthUI();
+        switchView("screener");
+      } else {
+        errBox.style.display = "block";
+      }
+    });
 
     function loadPreset(type) {
       const p = PRESETS[type];
@@ -301,6 +614,8 @@
         <ul class="tips-list">${data.tips.map(t => `<li>${t}</li>`).join("")}</ul>
       `;
     });
+
+    updateAuthUI();
   </script>
 </body>
 </html>
